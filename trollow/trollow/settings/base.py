@@ -80,6 +80,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'trollow.wsgi.application'
 
 
+AUTH_USER_MODEL = 'api.User'
+AUTHENTICATION_BACKENDS = [
+    'api.backends.EmailBackend'
+]
+
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
