@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from django.db import models
 from django.utils import six, timezone
 from django.utils.translation import ugettext_lazy as _
+import uuid
 
 
 class UserManager(BaseUserManager):
@@ -49,15 +50,21 @@ class User(AbstractBaseUser, PermissionsMixin):
             'unique': _("A user with that email already exists."),
         },
     )
+
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
+
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
         help_text=_('Designates whether the user can log into this admin site.'),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-
+    is_owner = models.BooleanField(
+        _('owner status'),
+        default=False,
+        help_text=_('Designates whether the user is an owner of a food truck'),
+    )
     USERNAME_FIELD = 'email'
 
 
@@ -77,6 +84,35 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.first_name.strip()
+
+
+class Truck(models.Model):
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=100, default='Food Truck')
+    description = models.CharField(max_length=500, default='Default Description')
+
+    def __str__(self):
+        return self.title
+
+
+def hour_later():
+    return timezone.now() + timezone.timedelta(hours=1)
+
+
+class Post(models.Model):
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    truck = models.ForeignKey(Truck, on_delete=models.CASCADE)
+    start_time = models.DateTimeField(default=timezone.now, help_text='Start time for opening')
+    end_time = models.DateTimeField(
+        default= hour_later,
+        help_text='End time for opening'
+    )
+
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, default=0.0)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, default=0.0)
+
+
 
 
 
