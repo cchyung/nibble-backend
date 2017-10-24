@@ -21,6 +21,7 @@ def root_view(request):
     })
 
 
+# ======================== Public Views ========================
 class TruckViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read-only views for trucks
@@ -30,7 +31,7 @@ class TruckViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Truck.objects.all()
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read-only views for all posts
     """
@@ -44,43 +45,41 @@ class PostViewSet(viewsets.ModelViewSet):
         return Post.objects.filter(truck=truck)
 
 
-# class MyTrucks(viewsets.ModelViewSet):
+# ======================== User Views ========================
+class MyTrucksViewSet(viewsets.ModelViewSet):
     """
         Views for creating, updating and deleting a user's trucks
     """
-
-
-class UserSignUp(generics.CreateAPIView):
-    """
-        Signup view
-    """
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class TruckSchedule(generics.ListAPIView):
-    """
-    Displays a truck's schedule in order based on start-time
-    """
-    serializer_class = PostSerializer
-
-    def get_queryset(self):
-        truck_uuid = self.kwargs['truck_uuid']
-        truck = Truck.objects.get(uuid=truck_uuid)
-        return Post.objects.filter(truck=truck)
-
-
-class TruckPostDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    Detail view for a truck's post
-    """
-    serializer_class = PostSerializer
-
+    serializer_class = MyTruckSerializer
     lookup_field = 'uuid'
+    queryset = Truck.objects.all()
 
     def get_queryset(self):
+        user = self.request.user
+        return Truck.objects.filter(owner=user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class MyPostViewSet(viewsets.ModelViewSet):
+    """
+    Read-only views for all posts
+    """
+    serializer_class = PostSerializer
+    lookup_field = 'post_uuid'
+    queryset = Post.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
         truck_uuid = self.kwargs['truck_uuid']
         truck = Truck.objects.get(uuid=truck_uuid)
-        return Post.objects.filter(truck=truck)
 
-
+        # Verify that the user has access to that truck
+        if truck.owner == user:
+            return Post.objects.filter(truck=truck)
+        else:
+            return None

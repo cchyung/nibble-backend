@@ -31,6 +31,20 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class TruckSerializer(serializers.ModelSerializer):
+    """
+    Read-only serializer for public view
+    """
+    class Meta:
+        model = models.Truck
+        fields = ('uuid', 'owner', 'title', 'description')
+        read_only_fields = ('uuid',)
+
+
+class MyTruckSerializer(serializers.ModelSerializer):
+    """
+    For editing trucks, the owner field automatically gets populated
+    """
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = models.Truck
