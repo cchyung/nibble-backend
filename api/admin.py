@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from django.contrib import admin
-from .models import User
+from .models import *
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import ugettext_lazy as _
@@ -35,3 +35,5 @@ class UserAdmin(UserAdmin):
     )
 
 admin.site.register(User, UserAdmin)
+admin.site.register(Truck)
+admin.site.register(Post)

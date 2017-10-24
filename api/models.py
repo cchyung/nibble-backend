@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from django.db import models
 from django.utils import six, timezone
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ValidationError
 import uuid
 
 
@@ -87,7 +88,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Truck(models.Model):
-    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False, primary_key=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100, default='Food Truck')
     description = models.CharField(max_length=500, default='Default Description')
@@ -111,6 +112,18 @@ class Post(models.Model):
 
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, default=0.0)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, default=0.0)
+
+    def save(self, *args, **kwargs):
+        start = self.start_time
+        end = self.end_time
+        if(start < end):
+            super(Post, self).save(*args, **kwargs)
+        else:
+            raise ValidationError('`start_time` cannot be after `end_time`')
+
+
+
+
 
 
 

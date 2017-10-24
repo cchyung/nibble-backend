@@ -11,6 +11,8 @@ from django.shortcuts import render
 # Create your views here.
 
 GITHUB_URL = 'https://github.com/cchyung/trollow-backend'
+
+
 @api_view(['GET'])
 def root_view(request):
     return Response({
@@ -19,13 +21,19 @@ def root_view(request):
     })
 
 
-class TruckViewSet(viewsets.ModelViewSet):
+class TruckViewSet(viewsets.ReadOnlyModelViewSet):
     """
-        Views for creating, updating, and deleting trucks
+    Read-only views for trucks
     """
-    queryset = Truck.objects.all()
     serializer_class = TruckSerializer
     lookup_field = 'uuid'
+    queryset = Truck.objects.all()
+
+
+# class MyTrucks(viewsets.ModelViewSet):
+    """
+        Views for creating, updating and deleting a user's trucks
+    """
 
 
 class UserSignUp(generics.CreateAPIView):
@@ -36,17 +44,23 @@ class UserSignUp(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
-class PostViewSet(viewsets.ReadOnlyModelViewSet):
+class PostViewSet(viewsets.ModelViewSet):
     """
     Read-only views for all posts
     """
-    queryset = Post.objects.all()
     serializer_class = PostSerializer
+    lookup_field = 'post_uuid'
+    queryset = Post.objects.all()
+
+    def get_queryset(self):
+        truck_uuid = self.kwargs['truck_uuid']
+        truck = Truck.objects.get(uuid=truck_uuid)
+        return Post.objects.filter(truck=truck)
 
 
-class TruckPosts(generics.ListAPIView):
+class TruckSchedule(generics.ListAPIView):
     """
-    List view for a truck's posts
+    Displays a truck's schedule in order based on start-time
     """
     serializer_class = PostSerializer
 
@@ -68,8 +82,5 @@ class TruckPostDetail(generics.RetrieveUpdateDestroyAPIView):
         truck_uuid = self.kwargs['truck_uuid']
         truck = Truck.objects.get(uuid=truck_uuid)
         return Post.objects.filter(truck=truck)
-
-
-
 
 
