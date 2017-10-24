@@ -44,6 +44,8 @@ class UserManager(BaseUserManager):
 
 # Create your models here.
 class User(AbstractBaseUser, PermissionsMixin):
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False, primary_key=True)
+
     email = models.EmailField(
         max_length=150,
         unique=True,

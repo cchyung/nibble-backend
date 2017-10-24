@@ -24,8 +24,6 @@ class PostSerializer(serializers.ModelSerializer):
         except exceptions.ValidationError as e:
             raise serializers.ValidationError(e.message)
 
-
-
     class Meta:
         model = models.Post
         fields = ('uuid', 'truck', 'start_time', 'end_time', 'latitude', 'longitude')
@@ -33,9 +31,8 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class TruckSerializer(serializers.ModelSerializer):
-    posts = PostSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Truck
-        fields = ('uuid', 'owner', 'title', 'description', 'posts')
+        fields = ('uuid', 'owner', 'title', 'description')
         read_only_fields = ('uuid',)
