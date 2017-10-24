@@ -30,20 +30,6 @@ class TruckViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Truck.objects.all()
 
 
-# class MyTrucks(viewsets.ModelViewSet):
-    """
-        Views for creating, updating and deleting a user's trucks
-    """
-
-
-class UserSignUp(generics.CreateAPIView):
-    """
-        Signup view
-    """
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
 class PostViewSet(viewsets.ModelViewSet):
     """
     Read-only views for all posts
@@ -56,6 +42,20 @@ class PostViewSet(viewsets.ModelViewSet):
         truck_uuid = self.kwargs['truck_uuid']
         truck = Truck.objects.get(uuid=truck_uuid)
         return Post.objects.filter(truck=truck)
+
+
+# class MyTrucks(viewsets.ModelViewSet):
+    """
+        Views for creating, updating and deleting a user's trucks
+    """
+
+
+class UserSignUp(generics.CreateAPIView):
+    """
+        Signup view
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 class TruckSchedule(generics.ListAPIView):
