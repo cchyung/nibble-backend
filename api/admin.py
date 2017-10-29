@@ -37,3 +37,6 @@ class UserAdmin(UserAdmin):
 admin.site.register(User, UserAdmin)
 admin.site.register(Truck)
 admin.site.register(Post)
+admin.site.register(LikedTruck)
+admin.site.register(TruckRating)
+admin.site.register(MenuItem)

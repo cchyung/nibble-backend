@@ -20,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         try:
-            super(PostSerializer, self).save(self, **kwargs)
+            super(PostSerializer, self).save()
         except exceptions.ValidationError as e:
             raise serializers.ValidationError(e.message)
 
@@ -36,13 +36,44 @@ class TruckSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = models.Truck
-        fields = ('uuid', 'owner', 'title', 'description')
+        fields = ('uuid', 'owner', 'title', 'description', 'genre', 'email', 'phone')
         read_only_fields = ('uuid',)
+
+
+class TruckLikeSerializer(serializers.ModelSerializer):
+    """
+    For TruckLikes
+    """
+    truck = TruckSerializer(read_only=True)
+
+    class Meta:
+        model = models.LikedTruck
+        fields = ('truck', 'user')
+
+
+class TruckRatingSerializer(serializers.ModelSerializer):
+    """
+    Serializer for truck ratings
+    """
+
+    class Meta:
+        model = models.TruckRating
+        fields = ('id', 'truck', 'user', 'rating')
+
+
+class MenuItemSerializer(serializers.ModelSerializer):
+    """
+    Serializer for menu items
+    """
+
+    class Meta:
+        model = models.MenuItem
+        fields = ('slug', 'truck', 'name', 'price', 'description', 'details')
 
 
 class MyTruckSerializer(serializers.ModelSerializer):
     """
-    For editing trucks, the owner field automatically gets populated
+    For editing trucks.  The owner field automatically gets populated based on the request user
     """
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
