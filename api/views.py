@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.models import *
 from api.serializers import *
+from api.permissions import *
 
 from django.shortcuts import render
 
@@ -71,6 +72,26 @@ def like_truck(request, truck_uuid):
                 'message': 'Truck ' + truck.uuid.__str__() + ' has already been liked by user ' + user.uuid.__str__()
         })
 
+@api_view(['GET'])
+def unlike_truck(request, truck_uuid):
+    """
+    For unliking trucks
+    """
+    truck = Truck.objects.all().get(uuid=truck_uuid)
+    user = request.user
+    # Check if like for this user and truck already exists
+    like = LikedTruck.objects.filter(truck=truck, user=user)
+    if like is not None:
+        like.delete
+
+    else:
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST,
+            data={
+                'error': 'TruckLikeNotFound',
+                'message': 'Cannot find like for given truck and user'
+        })
+
 
 class CreateRatingView(generics.ListCreateAPIView):
     serializer_class = TruckRatingSerializer
@@ -116,6 +137,8 @@ class RatingDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = TruckRating.objects.all()
     lookup_field = 'id'
 
+    permission_classes = (IsOwnerRatings,)
+
     def get_queryset(self):
         truck_uuid = self.kwargs['truck_uuid']
         truck = Truck.objects.get(uuid=truck_uuid)
@@ -143,6 +166,8 @@ class MyTrucksViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
     queryset = Truck.objects.all()
 
+    permission_classes = (IsOwnerTrucks,)
+
     def get_queryset(self):
         user = self.request.user
         return Truck.objects.filter(owner=user)
@@ -158,6 +183,8 @@ class MyPostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     lookup_field = 'post_uuid'
     queryset = Post.objects.all()
+
+    permission_classes = (IsOwnerTruckObjects,)
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -186,6 +213,8 @@ class MyMenuViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
     queryset = MenuItem.objects.all()
 
+    permission_classes = (IsOwnerTruckObjects,)
+
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
         truck_uuid = self.kwargs['truck_uuid']
@@ -212,4 +241,3 @@ class MyTruckLikes(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return LikedTruck.objects.filter(user=user)
-

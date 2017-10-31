@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^me/trucks/likes$', views.MyTruckLikes.as_view()),
     url(r'^trucks/(?P<truck_uuid>[\w-]+)/like/$', views.like_truck),
+    url(r'^trucks/(?P<truck_uuid>[\w-]+)/unlike/$', views.unlike_truck),
     url(r'^trucks/(?P<truck_uuid>[\w-]+)/ratings/$', views.CreateRatingView.as_view()),
     url(r'^trucks/(?P<truck_uuid>[\w-]+)/ratings/(?P<id>[\d]+)/$', views.RatingDetailView.as_view())
 ]
