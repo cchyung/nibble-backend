@@ -34,9 +34,12 @@ class TruckSerializer(serializers.ModelSerializer):
     """
     Read-only serializer for public view
     """
+
+    posts = PostSerializer(many=True, read_only=True)
+
     class Meta:
         model = models.Truck
-        fields = ('uuid', 'owner', 'title', 'description', 'genre', 'email', 'phone')
+        fields = ('uuid', 'posts', 'owner', 'title', 'description', 'genre', 'email', 'phone')
         read_only_fields = ('uuid',)
 
 

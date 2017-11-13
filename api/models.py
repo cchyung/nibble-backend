@@ -98,7 +98,8 @@ class Truck(models.Model):
     description = models.CharField(max_length=500, blank=True)
     genre = models.CharField(max_length=50, blank=True)
     email = models.EmailField(max_length=150, blank=True)
-    phone = models.CharField(max_length=9, blank=True)
+    phone = models.CharField(max_length=10, blank=True)
+    average_rating = models.DecimalField(max_digits=2, decimal_places=1, default=-1.0)
 
     def validate_phone(value):
         pattern = re.compile("^\d{10}$")
@@ -128,6 +129,25 @@ class TruckRating(models.Model):
     rating = models.IntegerField(default=1, validators=[MaxValueValidator(3), MinValueValidator(1)])
     unique_together = ('truck', 'user')
 
+    def save(self, *args, **kwargs):
+
+        # Recaculate average rating for truck being rated
+        new_rating = self.rating
+        truck = self.truck
+        review_count = truck.truckrating_set.count()
+        current_average_rating = truck.average_rating
+
+        # Check if truck has been rated yet, if not, just set the new rating to the average
+        if current_average_rating == -1:
+            truck.average_rating = new_rating
+        else:
+            new_average_rating = (current_average_rating * review_count + new_rating) / (review_count + 1)
+            truck.average_rating = new_average_rating
+        truck.save()
+        super(TruckRating, self).save(*args, **kwargs)
+
+
+
 
 class MenuItem(models.Model):
     truck = models.ForeignKey(Truck, on_delete=models.CASCADE)
@@ -156,7 +176,7 @@ def hour_later():
 
 class Post(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
-    truck = models.ForeignKey(Truck, on_delete=models.CASCADE)
+    truck = models.ForeignKey(Truck, related_name='posts', on_delete=models.CASCADE)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, default=0.0)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, default=0.0)
     start_time = models.DateTimeField(
