@@ -24,5 +24,4 @@ urlpatterns = [
     url(r'^v1/', include('api.urls', namespace='api')),
     url(r'^v1/auth/', include('djoser.urls')),
     url(r'^v1/auth/', include('djoser.urls.authtoken')),
-
 ]
