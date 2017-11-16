@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid, re
-import services
+from api import services
 from django.template.defaultfilters import slugify
 
 
