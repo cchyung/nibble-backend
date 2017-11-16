@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid, re
+import services
 from django.template.defaultfilters import slugify
 
 
@@ -130,19 +131,10 @@ class TruckRating(models.Model):
     unique_together = ('truck', 'user')
 
     def save(self, *args, **kwargs):
-
         # Recaculate average rating for truck being rated
         new_rating = self.rating
         truck = self.truck
-        review_count = truck.truckrating_set.count()
-        current_average_rating = truck.average_rating
-
-        # Check if truck has been rated yet, if not, just set the new rating to the average
-        if current_average_rating == -1:
-            truck.average_rating = new_rating
-        else:
-            new_average_rating = (current_average_rating * review_count + new_rating) / (review_count + 1)
-            truck.average_rating = new_average_rating
+        truck.rating = services.calculate_average_rating(truck, new_rating)
         truck.save()
         super(TruckRating, self).save(*args, **kwargs)
 

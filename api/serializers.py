@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from api import models
 from django.core import exceptions
+from api import services
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -48,10 +49,15 @@ class TruckLikeSerializer(serializers.ModelSerializer):
     For TruckLikes
     """
     truck = TruckSerializer(read_only=True)
+    location = serializers.SerializerMethodField()
+
+    def get_location(self, obj):
+        current_location = services.get_current_truck_location(obj.truck)
+        return current_location
 
     class Meta:
         model = models.LikedTruck
-        fields = ('truck', 'user')
+        fields = ('truck', 'user', 'location')
 
 
 class TruckRatingSerializer(serializers.ModelSerializer):
